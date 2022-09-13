@@ -61,4 +61,4 @@ Racional: Feedback de quando o botão efetivamente atira. Faz um som agudo toda 
 
 ### Design (2 pts)
 
-![(esboco.png)]
+![](esboco.png)
