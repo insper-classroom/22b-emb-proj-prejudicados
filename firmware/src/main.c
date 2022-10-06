@@ -20,10 +20,22 @@
 #define LED_IDX_MASK (1 << LED_IDX)
 
 // Botão
-#define BUT_PIO      PIOA
-#define BUT_PIO_ID   ID_PIOA
-#define BUT_IDX      11
+// #define BUT_PIO      PIOA
+// #define BUT_PIO_ID   ID_PIOA
+// #define BUT_IDX      11
+// #define BUT_IDX_MASK (1 << BUT_IDX)
+
+// Botão ESQUERDA
+#define BUT_PIO      PIOD
+#define BUT_PIO_ID   ID_PIOD
+#define BUT_IDX      30
 #define BUT_IDX_MASK (1 << BUT_IDX)
+
+// Botão Direita
+#define BUTRIGHT_PIO      PIOD
+#define BUTRIGHT_PIO_ID   ID_PIOD
+#define BUTRIGHT_IDX      20
+#define BUTRIGHT_IDX_MASK (1 << BUTRIGHT_IDX)
 
 // usart (bluetooth ou serial)
 // Descomente para enviar dados
@@ -112,10 +124,12 @@ void io_init(void) {
 	// Ativa PIOs
 	pmc_enable_periph_clk(LED_PIO_ID);
 	pmc_enable_periph_clk(BUT_PIO_ID);
+	pmc_enable_periph_clk(BUTRIGHT_PIO_ID);
 
 	// Configura Pinos
 	pio_configure(LED_PIO, PIO_OUTPUT_0, LED_IDX_MASK, PIO_DEFAULT | PIO_DEBOUNCE);
 	pio_configure(BUT_PIO, PIO_INPUT, BUT_IDX_MASK, PIO_PULLUP);
+	pio_configure(BUTRIGHT_PIO, PIO_INPUT, BUTRIGHT_IDX_MASK, PIO_PULLUP);
 }
 
 static void configure_console(void) {
@@ -201,11 +215,11 @@ int hc05_init(void) {
 	vTaskDelay( 500 / portTICK_PERIOD_MS);
 	usart_send_command(USART_COM, buffer_rx, 1000, "AT", 100);
 	vTaskDelay( 500 / portTICK_PERIOD_MS);
-	usart_send_command(USART_COM, buffer_rx, 1000, "AT+NAMEagoravai", 100);
+	usart_send_command(USART_COM, buffer_rx, 1000, "AT+NAMESpaceInvaders", 100);
 	vTaskDelay( 500 / portTICK_PERIOD_MS);
 	usart_send_command(USART_COM, buffer_rx, 1000, "AT", 100);
 	vTaskDelay( 500 / portTICK_PERIOD_MS);
-	usart_send_command(USART_COM, buffer_rx, 1000, "AT+PIN0000", 100);
+	usart_send_command(USART_COM, buffer_rx, 1000, "AT+PIN1234", 100);
 }
 
 /************************************************************************/
@@ -223,15 +237,23 @@ void task_bluetooth(void) {
 	io_init();
 
 	char button1 = '0';
+	char button2 = '0';
 	char eof = 'X';
 
 	// Task não deve retornar.
 	while(1) {
-		// atualiza valor do botão
+		// atualiza valor do botão esquerda do joy
 		if(pio_get(BUT_PIO, PIO_INPUT, BUT_IDX_MASK) == 0) {
 			button1 = '1';
 		} else {
 			button1 = '0';
+		}
+		
+		// atualiza valor do botão direita do joy
+		if(pio_get(BUTRIGHT_IDX, PIO_INPUT, BUTRIGHT_IDX_MASK) == 0) {
+			button2 = '1';
+			} else {
+			button2 = '0';
 		}
 
 		// envia status botão
@@ -239,6 +261,12 @@ void task_bluetooth(void) {
 			vTaskDelay(10 / portTICK_PERIOD_MS);
 		}
 		usart_write(USART_COM, button1);
+		
+		// envia status botão
+		while(!usart_is_tx_ready(USART_COM)) {
+			vTaskDelay(10 / portTICK_PERIOD_MS);
+		}
+		usart_write(USART_COM, button2);
 		
 		// envia fim de pacote
 		while(!usart_is_tx_ready(USART_COM)) {
