@@ -29,10 +29,11 @@
 #define BUTRIGHT_IDX_MASK (1 << BUTRIGHT_IDX)
 
 // Botão Iniciar Jogo
-#define BUTRIGHT_PIO      PIOC
-#define BUTRIGHT_PIO_ID   ID_PIOC
-#define BUTRIGHT_IDX      31
-#define BUTRIGHT_IDX_MASK (1 << BUTRIGHT_IDX)
+#define BUTSTART_PIO      PIOC
+#define BUTSTART_PIO_ID   ID_PIOC
+#define BUTSTART_IDX      31
+#define BUTSTART_IDX_MASK (1 << BUTSTART_IDX)
+
 
 // Definições da Task
 #define TASK_BLUETOOTH_STACK_SIZE (4096/sizeof(portSTACK_TYPE))
@@ -86,9 +87,16 @@ void task_bluetooth(void) {
 	} else {
 	button2 = '0';
 	}
+	if(pio_get(BUTSTART_PIO, PIO_INPUT, BUTSTART_IDX_MASK) == 0) {
+		button3 = '1';
+		} else {
+		button3 = '0';
+	}
 
 	printf("button1 = %c \n", button1);
 	printf("button2 = %c \n", button2);
+	printf("button3 = %c \n", button3);
+	
 	while(!usart_is_tx_ready(USART_COM)){
 	vTaskDelay(10/portTICK_PERIOD_MS);
 	}
@@ -98,6 +106,11 @@ void task_bluetooth(void) {
 	vTaskDelay(10/portTICK_PERIOD_MS);
 	}
 	usart_write(USART_COM, button2);
+	
+	while(!usart_is_tx_ready(USART_COM)){
+		vTaskDelay(10/portTICK_PERIOD_MS);
+	}
+	usart_write(USART_COM, button3);
 
 	while(!usart_is_tx_ready(USART_COM)){
 	vTaskDelay(10/portTICK_PERIOD_MS);
