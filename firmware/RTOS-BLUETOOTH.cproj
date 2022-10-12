@@ -647,8 +647,22 @@
     <Folder Include="src\ASF\thirdparty\freertos\freertos-8.2.3\Source\portable\GCC\ARM_CM7\r0p1\" />
     <Folder Include="src\ASF\thirdparty\freertos\freertos-8.2.3\Source\portable\MemMang\" />
     <Folder Include="src\config\" />
+    <Folder Include="src\rtos_config" />
+    <Folder Include="src\uart_config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="src\rtos_config\rtos_config.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\rtos_config\rtos_config.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\uart_config\uart_config.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\uart_config\uart_config.h">
+      <SubType>compile</SubType>
+    </Compile>
     <None Include="src\asf.h">
       <SubType>compile</SubType>
     </None>

@@ -6,7 +6,7 @@ import logging
 
 class MyControllerMap:
     def __init__(self):
-        self.button = {'A': 'L', 'B' : 'J'} # Fast forward (10 seg) pro Youtube
+        self.button = {'A': 'L', 'B' : 'J', 'C': 'enter'} # Fast forward (10 seg) pro Youtube
 
 class SerialControllerInterface:
     # Protocolo
@@ -20,6 +20,8 @@ class SerialControllerInterface:
         pyautogui.PAUSE = 0  ## remove delay
     
     def update(self):
+
+        print("Hello World")
         ## Sync protocol
         while self.incoming != b'X':
             self.incoming = self.ser.read()
@@ -30,6 +32,7 @@ class SerialControllerInterface:
 
         print(dataA)
         print(dataB)
+
         logging.debug("Received DATA: {}".format(dataA))
         logging.debug("Received DATA: {}".format(dataB))
 
@@ -50,6 +53,8 @@ class SerialControllerInterface:
         
 
         self.incoming = self.ser.read()
+
+
 
 
 class DummyControllerInterface:

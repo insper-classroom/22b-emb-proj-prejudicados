@@ -4,7 +4,6 @@ from math import ceil
 import pygame
 import os
 
-
 # Variáveis globais que são necessárias em diversos momentos
 
 ####     Cores     ####
