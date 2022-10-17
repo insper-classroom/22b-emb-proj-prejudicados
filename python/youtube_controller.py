@@ -6,7 +6,7 @@ import logging
 
 class MyControllerMap:
     def __init__(self):
-        self.button = {'A': 'L', 'B' : 'J', 'C': 'K'} # Fast forward (10 seg) pro Youtube
+        self.button = {'A': 'L', 'B' : 'J', 'C': 'space'} # Fast forward (10 seg) pro Youtube
 
 class SerialControllerInterface:
     # Protocolo
@@ -20,46 +20,47 @@ class SerialControllerInterface:
         pyautogui.PAUSE = 0  ## remove delay
     
     def update(self):
-
         ## Sync protocol
         while self.incoming != b'X':
             self.incoming = self.ser.read()
             logging.debug("Received INCOMING: {}".format(self.incoming))
 
-        dataA = self.ser.read()
-        dataB = self.ser.read()
-        dataC = self.ser.read()
+        data = self.ser.read()
 
-        print(f"data A: {dataA}")
-        print(f"data B: {dataB}")
-        print(f"data C: {dataC}")
+        print(f"data: {data}")
 
-        logging.debug("Received DATA: {}".format(dataA))
-        logging.debug("Received DATA: {}".format(dataB))
-        logging.debug("Received DATA: {}".format(dataC))
+        """
+        1 = start but
+        2 = joystick right
+        3 = joystick left
 
-        if dataA == b'1':
-            logging.info("KEYDOWN A")
-            pyautogui.keyDown(self.mapping.button['A'])
-        elif dataA == b'0':
+        """
+
+        logging.debug("Received DATA: {}".format(data))
+
+        if data == b'1':
+            logging.info("KEYDOWN C")
+            pyautogui.keyDown(self.mapping.button['C'])
+            logging.info("KEYUP B")
+            pyautogui.keyUp(self.mapping.button['B'])
             logging.info("KEYUP A")
             pyautogui.keyUp(self.mapping.button['A'])
 
-        if dataB == b'1':
+        if data == b'2':
             logging.info("KEYDOWN A")
-            pyautogui.keyDown(self.mapping.button['B'])
-        elif dataB == b'0':
-            logging.info("KEYUP A")
+            pyautogui.keyDown(self.mapping.button['A'])
+            logging.info("KEYUP B")
             pyautogui.keyUp(self.mapping.button['B'])
-        
-        if dataC == b'1':
-            logging.info("KEYDOWN A")
-            pyautogui.keyDown(self.mapping.button['C'])
-        elif dataC == b'0':
-            logging.info("KEYUP A")
+            logging.info("KEYUP C")
             pyautogui.keyUp(self.mapping.button['C'])
-
-
+        
+        if data == b'3':
+            logging.info("KEYDOWN B")
+            pyautogui.keyDown(self.mapping.button['B'])
+            logging.info("KEYUP C")
+            pyautogui.keyUp(self.mapping.button['C'])
+            logging.info("KEYUP A")
+            pyautogui.keyUp(self.mapping.button['A'])
         
 
         self.incoming = self.ser.read()
