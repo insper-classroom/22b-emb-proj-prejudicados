@@ -34,6 +34,17 @@
 #define BUTSTART_IDX      31
 #define BUTSTART_IDX_MASK (1 << BUTSTART_IDX)
 
+// Botão Exit Jogo
+#define BUTEXIT_PIO      PIOB
+#define BUTEXIT_PIO_ID   ID_PIOB
+#define BUTEXIT_IDX      3
+#define BUTEXIT_IDX_MASK (1 << BUTEXIT_IDX)
+
+// Sensor de força
+#define AFEC_FORCE AFEC0
+#define AFEC_FORCE_ID ID_AFEC0
+#define AFEC_FORCE_CHANNEL 5 // Canal do pino PB2
+
 
 // Definições da Task
 #define TASK_BLUETOOTH_STACK_SIZE (4096/sizeof(portSTACK_TYPE))
@@ -51,23 +62,36 @@
 
 void init_led(Pio *pio, uint32_t id, uint32_t mask);
 void init_startbut(void);
+void init_exitbut(void);
 void init_joystickr(void);
 void init_joystickl(void);
 int init_hc05(void);
 void joystickR_callback(void);
 void joystickL_callback(void);
 void startbut_callback(void);
+void exitbut_callback(void);
+static void config_AFEC_force(Afec *afec, uint32_t afec_id, uint32_t afec_channel, afec_callback_t callback);
 
 /* --- --- --- --- --- --- --- --- --- --- --- --- */
 // GLOBAL VARIABLES
 
 QueueHandle_t xQueueProtocolo;
+QueueHandle_t xQueueForce;
+
+typedef struct {
+	uint value;
+} forceData;
 
 /* --- --- --- --- --- --- --- --- --- --- --- --- */
 // HANDLERS E CALLBACKS
 
 void startbut_callback(void){
 	char id = '1';
+	xQueueSendFromISR(xQueueProtocolo, &id, 0);
+}
+
+void exitbut_callback(void){
+	char id = '4';
 	xQueueSendFromISR(xQueueProtocolo, &id, 0);
 }
 
@@ -80,6 +104,14 @@ void joystickL_callback(void){
 	char id = '3';
 	xQueueSendFromISR(xQueueProtocolo, &id, 0);
 }
+
+static void AFEC_force_callback(void) {
+	forceData force;
+	force.value = afec_channel_get_value(AFEC_FORCE, AFEC_FORCE_CHANNEL);
+	BaseType_t xHigherPriorityTaskWoken = pdTRUE;
+	xQueueSendFromISR(xQueueForce, &force, &xHigherPriorityTaskWoken);
+}
+
 
 /* Coloque suas funções de callback aqui /*
 /* --- --- --- --- --- --- --- --- --- --- --- --- */
@@ -94,12 +126,14 @@ void task_bluetooth(void) {
 	init_hc05();
 	init_led(LED_PIO, LED_PIO_ID, LED_PIO_IDX_MASK);
 	init_startbut();
+	init_exitbut();
 	init_joystickr();
 	init_joystickl();
+	config_AFEC_force(AFEC_FORCE, AFEC_FORCE_ID, AFEC_FORCE_CHANNEL, AFEC_force_callback);
 
 	char id = '0';
 	char eof = 'X';
-
+	forceData force;
 	
 	for(;;){
 		if( xQueueReceive(xQueueProtocolo, &id, ( TickType_t ) 500 )){
@@ -118,6 +152,10 @@ void task_bluetooth(void) {
 			usart_write(USART_COM, eof);
 			vTaskDelay(500 / portTICK_PERIOD_MS);
 			
+		}
+		
+		if(xQueueReceive(xQueueForce, &(force), 1000)){
+			printf("forca = %d \n", force);
 		}
 	}
 
@@ -144,6 +182,16 @@ void init_startbut(void){
 	pio_get_interrupt_status(BUTSTART_PIO);
 	NVIC_EnableIRQ(BUTSTART_PIO_ID);
 	NVIC_SetPriority(BUTSTART_PIO_ID, 4);
+}
+
+void init_exitbut(void){
+	pmc_enable_periph_clk(BUTEXIT_PIO_ID);
+	pio_configure(BUTEXIT_PIO, PIO_INPUT, BUTEXIT_IDX_MASK, PIO_PULLUP| PIO_DEBOUNCE);
+	pio_handler_set(BUTEXIT_PIO, BUTEXIT_PIO_ID, BUTEXIT_IDX_MASK, PIO_IT_FALL_EDGE, exitbut_callback);
+	pio_enable_interrupt(BUTEXIT_PIO, BUTEXIT_IDX_MASK);
+	pio_get_interrupt_status(BUTEXIT_PIO);
+	NVIC_EnableIRQ(BUTEXIT_PIO_ID);
+	NVIC_SetPriority(BUTEXIT_PIO_ID, 4);
 }
 
 void init_joystickr(void){
@@ -182,6 +230,49 @@ vTaskDelay( 500 / portTICK_PERIOD_MS);
 usart_send_command(USART_COM, buffer_rx, 1000, "AT+PIN1234", 100);
 }
 
+
+static void config_AFEC_force(Afec *afec, uint32_t afec_id, uint32_t afec_channel, afec_callback_t callback) {
+
+  afec_enable(afec);
+
+  /* struct de configuracao do AFEC */
+  struct afec_config afec_cfg;
+
+  /* Carrega parametros padrao */
+  afec_get_config_defaults(&afec_cfg);
+
+  /* Configura AFEC */
+  afec_init(afec, &afec_cfg);
+
+  /* Configura trigger por software */
+  afec_set_trigger(afec, AFEC_TRIG_SW);
+
+  /*** Configuracao específica do canal AFEC ***/
+  struct afec_ch_config afec_ch_cfg;
+  afec_ch_get_config_defaults(&afec_ch_cfg);
+  afec_ch_cfg.gain = AFEC_GAINVALUE_0;
+  afec_ch_set_config(afec, afec_channel, &afec_ch_cfg);
+
+  /*
+  * Calibracao:
+  * Because the internal ADC offset is 0x200, it should cancel it and shift
+  down to 0.
+  */
+  afec_channel_set_analog_offset(afec, afec_channel, 0x200);
+
+  /***  Configura sensor de temperatura ***/
+  struct afec_temp_sensor_config afec_temp_sensor_cfg;
+
+  afec_temp_sensor_get_config_defaults(&afec_temp_sensor_cfg);
+  afec_temp_sensor_set_config(afec, &afec_temp_sensor_cfg);
+
+  /* configura IRQ */
+  afec_set_callback(afec, afec_channel, callback, 1);
+  NVIC_SetPriority(afec_id, 4);
+  NVIC_EnableIRQ(afec_id);
+}
+
+
 /* --- --- --- --- --- --- --- --- --- --- --- --- */
 // MAIN
 
@@ -196,8 +287,10 @@ configure_console();
 xTaskCreate(task_bluetooth, "BLT", TASK_BLUETOOTH_STACK_SIZE, NULL,	TASK_BLUETOOTH_STACK_PRIORITY, NULL);
 
 xQueueProtocolo = xQueueCreate(32, sizeof(char) );
+xQueueForce = xQueueCreate(100, sizeof(forceData));
 
 if (xQueueProtocolo == NULL){printf("falha em criar a fila \n");}
+if (xQueueForce == NULL){printf("falha em criar a queue xQueueForce \n");}
 
 /* Start the scheduler. */
 vTaskStartScheduler();

@@ -1,4 +1,4 @@
-import pyautogui
+import pydirectinput
 import serial
 import argparse
 import time
@@ -6,7 +6,7 @@ import logging
 
 class MyControllerMap:
     def __init__(self):
-        self.button = {'A': 'L', 'B' : 'J', 'C': 'space'} # Fast forward (10 seg) pro Youtube
+        self.button = {'A': 'right', 'B' : 'left', 'C': 'space', 'D':'esc'} # Fast forward (10 seg) pro Youtube
 
 class SerialControllerInterface:
     # Protocolo
@@ -17,7 +17,7 @@ class SerialControllerInterface:
         self.ser = serial.Serial(port, baudrate=baudrate)
         self.mapping = MyControllerMap()
         self.incoming = '0'
-        pyautogui.PAUSE = 0  ## remove delay
+        pydirectinput.PAUSE = 0  ## remove delay
     
     def update(self):
         ## Sync protocol
@@ -33,34 +33,50 @@ class SerialControllerInterface:
         1 = start but
         2 = joystick right
         3 = joystick left
-
+        4 = esc but
         """
 
         logging.debug("Received DATA: {}".format(data))
 
         if data == b'1':
             logging.info("KEYDOWN C")
-            pyautogui.keyDown(self.mapping.button['C'])
+            pydirectinput.keyDown(self.mapping.button['C'])
             logging.info("KEYUP B")
-            pyautogui.keyUp(self.mapping.button['B'])
+            pydirectinput.keyUp(self.mapping.button['B'])
             logging.info("KEYUP A")
-            pyautogui.keyUp(self.mapping.button['A'])
+            pydirectinput.keyUp(self.mapping.button['A'])
+            logging.info("KEYUP D")
+            pydirectinput.keyUp(self.mapping.button['D'])
 
         if data == b'2':
             logging.info("KEYDOWN A")
-            pyautogui.keyDown(self.mapping.button['A'])
+            pydirectinput.keyDown(self.mapping.button['A'])
             logging.info("KEYUP B")
-            pyautogui.keyUp(self.mapping.button['B'])
+            pydirectinput.keyUp(self.mapping.button['B'])
             logging.info("KEYUP C")
-            pyautogui.keyUp(self.mapping.button['C'])
+            pydirectinput.keyUp(self.mapping.button['C'])
+            logging.info("KEYUP D")
+            pydirectinput.keyUp(self.mapping.button['D'])
         
         if data == b'3':
             logging.info("KEYDOWN B")
-            pyautogui.keyDown(self.mapping.button['B'])
+            pydirectinput.keyDown(self.mapping.button['B'])
             logging.info("KEYUP C")
-            pyautogui.keyUp(self.mapping.button['C'])
+            pydirectinput.keyUp(self.mapping.button['C'])
             logging.info("KEYUP A")
-            pyautogui.keyUp(self.mapping.button['A'])
+            pydirectinput.keyUp(self.mapping.button['A'])
+            logging.info("KEYUP D")
+            pydirectinput.keyUp(self.mapping.button['D'])   
+
+        if data == b'4':
+            logging.info("KEYDOWN D")
+            pydirectinput.keyDown(self.mapping.button['D'])
+            logging.info("KEYUP C")
+            pydirectinput.keyUp(self.mapping.button['C'])
+            logging.info("KEYUP A")
+            pydirectinput.keyUp(self.mapping.button['A'])
+            logging.info("KEYUP B")
+            pydirectinput.keyUp(self.mapping.button['B'])
         
 
         self.incoming = self.ser.read()
@@ -73,9 +89,9 @@ class DummyControllerInterface:
         self.mapping = MyControllerMap()
 
     def update(self):
-        pyautogui.keyDown(self.mapping.button['A'])
+        pydirectinput.keyDown(self.mapping.button['A'])
         time.sleep(0.1)
-        pyautogui.keyUp(self.mapping.button['A'])
+        pydirectinput.keyUp(self.mapping.button['A'])
         logging.info("[Dummy] Pressed A button")
         time.sleep(1)
 
