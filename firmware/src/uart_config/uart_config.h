@@ -13,7 +13,7 @@
 // Descomente para enviar dados
 // pela serial debug
 
-//#define DEBUG_SERIAL
+//#define DEBUG_SERIAL  //comendar isso para funcionar bt
 
 #ifdef DEBUG_SERIAL
 #define USART_COM USART1

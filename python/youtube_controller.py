@@ -17,7 +17,7 @@ class SerialControllerInterface:
         self.ser = serial.Serial(port, baudrate=baudrate)
         self.mapping = MyControllerMap()
         self.incoming = '0'
-        pydirectinput.PAUSE = 0  ## remove delay
+        pydirectinput.PAUSE = 0  ## remove delay   
     
     def update(self):
         ## Sync protocol
@@ -38,6 +38,12 @@ class SerialControllerInterface:
 
         logging.debug("Received DATA: {}".format(data))
 
+        if data == b'0':
+            logging.info("KEYUP B")
+            pydirectinput.keyUp(self.mapping.button['B'])
+            logging.info("KEYUP A")
+            pydirectinput.keyUp(self.mapping.button['A'])
+
         if data == b'1':
             logging.info("KEYDOWN C")
             pydirectinput.keyDown(self.mapping.button['C'])
@@ -50,7 +56,7 @@ class SerialControllerInterface:
 
         if data == b'2':
             logging.info("KEYDOWN A")
-            pydirectinput.keyDown(self.mapping.button['A'])
+            pydirectinput.keyDown(self.mapping.button['A']) 
             logging.info("KEYUP B")
             pydirectinput.keyUp(self.mapping.button['B'])
             logging.info("KEYUP C")
@@ -65,7 +71,7 @@ class SerialControllerInterface:
             pydirectinput.keyUp(self.mapping.button['C'])
             logging.info("KEYUP A")
             pydirectinput.keyUp(self.mapping.button['A'])
-            logging.info("KEYUP D")
+            logging.info("KEYUP D")  
             pydirectinput.keyUp(self.mapping.button['D'])   
 
         if data == b'4':

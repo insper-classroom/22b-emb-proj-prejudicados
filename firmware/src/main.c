@@ -96,20 +96,38 @@ void exitbut_callback(void){
 }
 
 void joystickR_callback(void){
-	char id = '2';
-	xQueueSendFromISR(xQueueProtocolo, &id, 0);
+	//botao foi abertado
+	if(!pio_get(BUTRIGHT_PIO , PIO_INPUT, BUTRIGHT_IDX_MASK)){
+		char id = '2';
+		xQueueSendFromISR(xQueueProtocolo, &id, 0);
+	}
+	else{
+		char id = '0';
+		xQueueSendFromISR(xQueueProtocolo, &id, 0);
+	}
 }
 
 void joystickL_callback(void){
-	char id = '3';
-	xQueueSendFromISR(xQueueProtocolo, &id, 0);
+	//botao foi abertado
+	if(!pio_get(BUTLEFT_PIO , PIO_INPUT, BUTLEFT_IDX_MASK)){
+		char id = '3';
+		xQueueSendFromISR(xQueueProtocolo, &id, 0);
+	}
+	else{
+		char id = '0';
+		xQueueSendFromISR(xQueueProtocolo, &id, 0);
+	}
 }
 
 static void AFEC_force_callback(void) {
 	forceData force;
 	force.value = afec_channel_get_value(AFEC_FORCE, AFEC_FORCE_CHANNEL);
 	BaseType_t xHigherPriorityTaskWoken = pdTRUE;
-	xQueueSendFromISR(xQueueForce, &force, &xHigherPriorityTaskWoken);
+	if(force.value >= 3000){
+		char id = '5';
+		xQueueSendFromISR(xQueueProtocolo, &id, 0);
+	}
+	//xQueueSendFromISR(xQueueForce, &force, &xHigherPriorityTaskWoken);
 }
 
 
@@ -154,9 +172,9 @@ void task_bluetooth(void) {
 			
 		}
 		
-		if(xQueueReceive(xQueueForce, &(force), 1000)){
-			printf("forca = %d \n", force);
-		}
+// 		if(xQueueReceive(xQueueForce, &(force), 1000)){
+// 			printf("force = %d \n", force);
+// 		}
 	}
 
 }
@@ -198,7 +216,7 @@ void init_joystickr(void){
 	pmc_enable_periph_clk(BUTRIGHT_PIO_ID);
 	pio_configure(BUTRIGHT_PIO, PIO_INPUT, BUTRIGHT_IDX_MASK, PIO_PULLUP| PIO_DEBOUNCE);
 	pio_set_debounce_filter(BUTRIGHT_PIO, BUTRIGHT_IDX_MASK, 60);
-	pio_handler_set(BUTRIGHT_PIO, BUTRIGHT_PIO_ID, BUTRIGHT_IDX_MASK, PIO_IT_FALL_EDGE, joystickR_callback);
+	pio_handler_set(BUTRIGHT_PIO, BUTRIGHT_PIO_ID, BUTRIGHT_IDX_MASK, PIO_IT_EDGE, joystickR_callback);
 	pio_enable_interrupt(BUTRIGHT_PIO, BUTRIGHT_IDX_MASK);
 	pio_get_interrupt_status(BUTRIGHT_PIO);
 	NVIC_EnableIRQ(BUTRIGHT_PIO_ID);
@@ -210,7 +228,7 @@ void init_joystickl(void){
 	pio_configure(BUTLEFT_PIO, PIO_INPUT, BUTLEFT_IDX_MASK, PIO_PULLUP | PIO_DEBOUNCE);
 	pio_set_debounce_filter(BUTLEFT_PIO, BUTLEFT_IDX_MASK, 60);
 
-	pio_handler_set(BUTLEFT_PIO, BUTLEFT_PIO_ID, BUTLEFT_IDX_MASK, PIO_IT_FALL_EDGE , joystickL_callback);
+	pio_handler_set(BUTLEFT_PIO, BUTLEFT_PIO_ID, BUTLEFT_IDX_MASK, PIO_IT_EDGE, joystickL_callback);
 	pio_enable_interrupt(BUTLEFT_PIO, BUTLEFT_IDX_MASK);
 	pio_get_interrupt_status(BUTLEFT_PIO);
 	NVIC_EnableIRQ(BUTLEFT_PIO_ID);
