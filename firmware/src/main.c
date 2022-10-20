@@ -70,7 +70,9 @@ void joystickR_callback(void);
 void joystickL_callback(void);
 void startbut_callback(void);
 void exitbut_callback(void);
+static void AFEC_force_callback(void);
 static void config_AFEC_force(Afec *afec, uint32_t afec_id, uint32_t afec_channel, afec_callback_t callback);
+void send_package(char id, char eof);
 
 /* --- --- --- --- --- --- --- --- --- --- --- --- */
 // GLOBAL VARIABLES
@@ -123,11 +125,11 @@ static void AFEC_force_callback(void) {
 	forceData force;
 	force.value = afec_channel_get_value(AFEC_FORCE, AFEC_FORCE_CHANNEL);
 	BaseType_t xHigherPriorityTaskWoken = pdTRUE;
-	if(force.value >= 3000){
-		char id = '5';
-		xQueueSendFromISR(xQueueProtocolo, &id, 0);
-	}
-	//xQueueSendFromISR(xQueueForce, &force, &xHigherPriorityTaskWoken);
+// 	if(force.value >= 3000){
+// 		char id = '5';
+// 		xQueueSendFromISR(xQueueProtocolo, &id, 0);
+// 	}
+	xQueueSendFromISR(xQueueForce, &force, &xHigherPriorityTaskWoken);
 }
 
 
@@ -155,26 +157,11 @@ void task_bluetooth(void) {
 	
 	for(;;){
 		if( xQueueReceive(xQueueProtocolo, &id, ( TickType_t ) 500 )){
-			
-			printf("id = %c \n", id);
-			
-			while(!usart_is_tx_ready(USART_COM)){
-				vTaskDelay(10/portTICK_PERIOD_MS);
-			}
-			usart_write(USART_COM, id);
-			
-			while(!usart_is_tx_ready(USART_COM)){
-				vTaskDelay(10/portTICK_PERIOD_MS);
-			}
-			
-			usart_write(USART_COM, eof);
-			vTaskDelay(500 / portTICK_PERIOD_MS);
-			
+			send_package(id, eof);
 		}
-		
-// 		if(xQueueReceive(xQueueForce, &(force), 1000)){
-// 			printf("force = %d \n", force);
-// 		}
+		if(xQueueReceive(xQueueForce, &(force), 1000)){
+			printf("force = %d \n", force);
+		}
 	}
 
 }
@@ -190,7 +177,6 @@ void init_led(Pio *pio, uint32_t id, uint32_t mask) {
 pmc_enable_periph_clk(id);
 pio_set_output(pio, mask, 0, 0, 0);
 }
-
 
 void init_startbut(void){
 	pmc_enable_periph_clk(BUTSTART_PIO_ID);
@@ -290,6 +276,20 @@ static void config_AFEC_force(Afec *afec, uint32_t afec_id, uint32_t afec_channe
   NVIC_EnableIRQ(afec_id);
 }
 
+
+void send_package(char id, char eof){
+	while(!usart_is_tx_ready(USART_COM)){
+		vTaskDelay(10/portTICK_PERIOD_MS);
+	}
+	usart_write(USART_COM, id);
+	
+	while(!usart_is_tx_ready(USART_COM)){
+		vTaskDelay(10/portTICK_PERIOD_MS);
+	}
+	
+	usart_write(USART_COM, eof);
+	vTaskDelay(500 / portTICK_PERIOD_MS);
+}
 
 /* --- --- --- --- --- --- --- --- --- --- --- --- */
 // MAIN
