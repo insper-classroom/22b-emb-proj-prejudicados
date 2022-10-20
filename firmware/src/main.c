@@ -127,11 +127,11 @@ static void AFEC_force_callback(void) {
 	forceData force;
 	force.value = afec_channel_get_value(AFEC_FORCE, AFEC_FORCE_CHANNEL);
 	BaseType_t xHigherPriorityTaskWoken = pdTRUE;
-// 	if(force.value >= 3000){
-// 		char id = '5';
-// 		xQueueSendFromISR(xQueueProtocolo, &id, 0);
-// 	}
-	xQueueSendFromISR(xQueueForce, &force, &xHigherPriorityTaskWoken);
+	if(force.value >= 3000){
+		char id = '5';
+		xQueueSendFromISR(xQueueProtocolo, &id, 0);
+	}
+	//xQueueSendFromISR(xQueueForce, &force, &xHigherPriorityTaskWoken);
 }
 
 
@@ -166,12 +166,12 @@ void task_bluetooth(void) {
 	forceData force;
 	
 	for(;;){
-		if( xQueueReceive(xQueueProtocolo, &id, ( TickType_t ) 500 )){
+		if( xQueueReceive(xQueueProtocolo, &id, ( TickType_t ) 0 )){
 			send_package(id, eof);
 		}
-		if(xQueueReceive(xQueueForce, &(force), 1000)){
-			printf("force = %d \n", force);
-		}
+// 		if(xQueueReceive(xQueueForce, &(force), 0)){
+// 			printf("force = %d \n", force);
+// 		}
 	}
 
 }
