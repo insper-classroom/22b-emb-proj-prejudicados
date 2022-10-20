@@ -6,7 +6,7 @@ import logging
 
 class MyControllerMap:
     def __init__(self):
-        self.button = {'A': 'right', 'B' : 'left', 'C': 'space', 'D':'esc'} # Fast forward (10 seg) pro Youtube
+        self.button = {'joyright': 'right', 'joyleft' : 'left', 'start': 'space', 'out':'esc'} # Fast forward (10 seg) pro Youtube
 
 class SerialControllerInterface:
     # Protocolo
@@ -40,49 +40,49 @@ class SerialControllerInterface:
 
         if data == b'0':
             logging.info("KEYUP B")
-            pydirectinput.keyUp(self.mapping.button['B'])
+            pydirectinput.keyUp(self.mapping.button['joyleft'])
             logging.info("KEYUP A")
-            pydirectinput.keyUp(self.mapping.button['A'])
+            pydirectinput.keyUp(self.mapping.button['joyright'])
 
         if data == b'1':
             logging.info("KEYDOWN C")
-            pydirectinput.keyDown(self.mapping.button['C'])
+            pydirectinput.keyDown(self.mapping.button['start'])
             logging.info("KEYUP B")
-            pydirectinput.keyUp(self.mapping.button['B'])
+            pydirectinput.keyUp(self.mapping.button['joyleft'])
             logging.info("KEYUP A")
-            pydirectinput.keyUp(self.mapping.button['A'])
+            pydirectinput.keyUp(self.mapping.button['joyright'])
             logging.info("KEYUP D")
-            pydirectinput.keyUp(self.mapping.button['D'])
+            pydirectinput.keyUp(self.mapping.button['out'])
 
         if data == b'2':
             logging.info("KEYDOWN A")
-            pydirectinput.keyDown(self.mapping.button['A']) 
+            pydirectinput.keyDown(self.mapping.button['joyright']) 
             logging.info("KEYUP B")
-            pydirectinput.keyUp(self.mapping.button['B'])
+            pydirectinput.keyUp(self.mapping.button['joyleft'])
             logging.info("KEYUP C")
-            pydirectinput.keyUp(self.mapping.button['C'])
+            pydirectinput.keyUp(self.mapping.button['start'])
             logging.info("KEYUP D")
-            pydirectinput.keyUp(self.mapping.button['D'])
+            pydirectinput.keyUp(self.mapping.button['out'])
         
         if data == b'3':
             logging.info("KEYDOWN B")
-            pydirectinput.keyDown(self.mapping.button['B'])
+            pydirectinput.keyDown(self.mapping.button['joyleft'])
             logging.info("KEYUP C")
-            pydirectinput.keyUp(self.mapping.button['C'])
+            pydirectinput.keyUp(self.mapping.button['start'])
             logging.info("KEYUP A")
-            pydirectinput.keyUp(self.mapping.button['A'])
+            pydirectinput.keyUp(self.mapping.button['joyright'])
             logging.info("KEYUP D")  
-            pydirectinput.keyUp(self.mapping.button['D'])   
+            pydirectinput.keyUp(self.mapping.button['out'])   
 
         if data == b'4':
             logging.info("KEYDOWN D")
-            pydirectinput.keyDown(self.mapping.button['D'])
+            pydirectinput.keyDown(self.mapping.button['out'])
             logging.info("KEYUP C")
-            pydirectinput.keyUp(self.mapping.button['C'])
+            pydirectinput.keyUp(self.mapping.button['start'])
             logging.info("KEYUP A")
-            pydirectinput.keyUp(self.mapping.button['A'])
+            pydirectinput.keyUp(self.mapping.button['joyright'])
             logging.info("KEYUP B")
-            pydirectinput.keyUp(self.mapping.button['B'])
+            pydirectinput.keyUp(self.mapping.button['joyleft']) 
         
 
         self.incoming = self.ser.read()

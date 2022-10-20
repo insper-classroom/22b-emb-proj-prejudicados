@@ -77,6 +77,8 @@ void send_package(char id, char eof);
 /* --- --- --- --- --- --- --- --- --- --- --- --- */
 // GLOBAL VARIABLES
 
+TimerHandle_t xTimer;
+
 QueueHandle_t xQueueProtocolo;
 QueueHandle_t xQueueForce;
 
@@ -133,6 +135,12 @@ static void AFEC_force_callback(void) {
 }
 
 
+void vTimerCallback(TimerHandle_t xTimer) {
+	/* Selecina canal e inicializa conversão */
+	afec_channel_enable(AFEC_FORCE, AFEC_FORCE_CHANNEL);
+	afec_start_software_conversion(AFEC_FORCE);
+}
+
 /* Coloque suas funções de callback aqui /*
 /* --- --- --- --- --- --- --- --- --- --- --- --- */
 // TASKS
@@ -150,6 +158,8 @@ void task_bluetooth(void) {
 	init_joystickr();
 	init_joystickl();
 	config_AFEC_force(AFEC_FORCE, AFEC_FORCE_ID, AFEC_FORCE_CHANNEL, AFEC_force_callback);
+	xTimer = xTimerCreate("Timer", 100, pdTRUE, (void *)0, vTimerCallback);
+	xTimerStart(xTimer, 0);
 
 	char id = '0';
 	char eof = 'X';
