@@ -6,7 +6,7 @@ import logging
 
 class MyControllerMap:
     def __init__(self):
-        self.button = {'joyright': 'right', 'joyleft' : 'left', 'start': 'enter', 'out':'esc', 'shoot': 'space'} # Fast forward (10 seg) pro Youtube
+        self.button = {'joyright': 'right', 'joyleft' : 'left', 'start': 'enter', 'out':'esc', 'shoot': 'space'}
 
 class SerialControllerInterface:
     # Protocolo
@@ -26,10 +26,12 @@ class SerialControllerInterface:
             self.incoming = self.ser.read()
             logging.debug("Received INCOMING: {}".format(self.incoming))
 
-        data = self.ser.read() 
-        #self.ser.write()
 
-        print(f"data: {data}") 
+        data = self.ser.read() 
+        
+
+        print(f"data: {data}")
+
 
         """
         1 = start but
@@ -45,72 +47,45 @@ class SerialControllerInterface:
             self.ser.write(b'H') 
 
         if data == b'0':
-            logging.info("KEYUP B")
             pydirectinput.keyUp(self.mapping.button['joyleft'])
-            logging.info("KEYUP A")
             pydirectinput.keyUp(self.mapping.button['joyright'])        
 
         if data == b'1':
-            logging.info("KEYDOWN C")
             pydirectinput.keyDown(self.mapping.button['start'])
-            logging.info("KEYUP B")
             pydirectinput.keyUp(self.mapping.button['joyleft'])
-            logging.info("KEYUP A")
             pydirectinput.keyUp(self.mapping.button['joyright'])
-            logging.info("KEYUP D")
             pydirectinput.keyUp(self.mapping.button['out'])
-            logging.info("KEYUP E")  
             pydirectinput.keyUp(self.mapping.button['shoot']) 
 
         if data == b'2':
-            logging.info("KEYDOWN A")
             pydirectinput.keyDown(self.mapping.button['joyright']) 
-            logging.info("KEYUP B")
             pydirectinput.keyUp(self.mapping.button['joyleft'])
-            logging.info("KEYUP C")
             pydirectinput.keyUp(self.mapping.button['start'])
-            logging.info("KEYUP D")
-            pydirectinput.keyUp(self.mapping.button['out'])
-            logging.info("KEYUP E")  
+            pydirectinput.keyUp(self.mapping.button['out']) 
             pydirectinput.keyUp(self.mapping.button['shoot']) 
         
         if data == b'3':
-            logging.info("KEYDOWN B")
             pydirectinput.keyDown(self.mapping.button['joyleft'])
-            logging.info("KEYUP C")
             pydirectinput.keyUp(self.mapping.button['start'])
-            logging.info("KEYUP A")
             pydirectinput.keyUp(self.mapping.button['joyright'])
-            logging.info("KEYUP D")  
-            pydirectinput.keyUp(self.mapping.button['out'])
-            logging.info("KEYUP E")  
+            pydirectinput.keyUp(self.mapping.button['out']) 
             pydirectinput.keyUp(self.mapping.button['shoot'])  
 
         if data == b'4':
-            logging.info("KEYDOWN D")
             pydirectinput.keyDown(self.mapping.button['out'])
-            logging.info("KEYUP C")
             pydirectinput.keyUp(self.mapping.button['start'])
-            logging.info("KEYUP A")
             pydirectinput.keyUp(self.mapping.button['joyright'])
-            logging.info("KEYUP B")
             pydirectinput.keyUp(self.mapping.button['joyleft'])
-            logging.info("KEYUP E")  
             pydirectinput.keyUp(self.mapping.button['shoot'])  
         
 
         if data == b'5':
-            logging.info("KEYDOWN E")
             pydirectinput.keyDown(self.mapping.button['shoot'])
-            time.sleep(0.1)
+            time.sleep(0.05)
             pydirectinput.keyUp(self.mapping.button['shoot']) 
-            logging.info("KEYUP C")
             pydirectinput.keyUp(self.mapping.button['start'])
-            logging.info("KEYUP A")
             pydirectinput.keyUp(self.mapping.button['joyright'])
-            logging.info("KEYUP B")
-            pydirectinput.keyUp(self.mapping.button['joyleft'])
-            logging.info("KEYUP D")  
+            pydirectinput.keyUp(self.mapping.button['joyleft']) 
             pydirectinput.keyUp(self.mapping.button['out']) 
 
         self.incoming = self.ser.read()

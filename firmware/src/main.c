@@ -43,7 +43,7 @@
 // Sensor de força
 #define AFEC_FORCE AFEC0
 #define AFEC_FORCE_ID ID_AFEC0
-#define AFEC_FORCE_CHANNEL 5 // Canal do pino PB2
+#define AFEC_FORCE_CHANNEL 5
 
 // Botão On e Off 
 #define BUTONOFF_PIO      PIOD
@@ -56,9 +56,9 @@
 #define TASK_BLUETOOTH_STACK_PRIORITY (tskIDLE_PRIORITY)
 
 // LED conexão BT
-#define LEDBT_PIO      PIOB
-#define LEDBT_PIO_ID   ID_PIOB
-#define LEDBT_IDX      3
+#define LEDBT_PIO      PIOD
+#define LEDBT_PIO_ID   ID_PIOD
+#define LEDBT_IDX      27
 #define LEDBT_IDX_MASK (1 << LEDBT_IDX)
 
 // Variáveis Globais
@@ -87,6 +87,7 @@ static void AFEC_force_callback(void);
 static void config_AFEC_force(Afec *afec, uint32_t afec_id, uint32_t afec_channel, afec_callback_t callback);
 void send_package(char id, char eof);
 char recive_package(void);
+void pin_toggle(Pio *pio, uint32_t mask);
 /* --- --- --- --- --- --- --- --- --- --- --- --- */
 // GLOBAL VARIABLES
 
@@ -145,7 +146,6 @@ static void AFEC_force_callback(void) {
 		char id = '5';
 		xQueueSendFromISR(xQueueProtocolo, &id, 0);
 	}
-/*	xQueueSendFromISR(xQueueForce, &force, &xHigherPriorityTaskWoken);*/
 }
 
 
@@ -199,15 +199,13 @@ void task_bluetooth(void) {
 			printf("but on off \n");
 			run = 0;
 			while(run == 0) {
-				//send handshake
+				//handshake
 				send_package('H', 'X');
-				//esperando respostas
 				response = recive_package();
 				printf("%c", response);
 				pisca_LEDBT();
 				//tudo certo
 				if(response == 'H'){
-					//caso ainda o programa nao esteja rodando (queremos ligar)
 					run = 1;
 					break;
 				}
@@ -216,11 +214,11 @@ void task_bluetooth(void) {
 		if(run == 1){
 			if( xQueueReceive(xQueueProtocolo, &id, ( TickType_t ) 0 )){
 				send_package(id, eof);
+				if (id == '5'){
+					pin_toggle(LEDBT_PIO, LEDBT_IDX_MASK);
+				}
 			}
 		}	
-// 		if( xQueueReceive(xQueueForce, &force, ( TickType_t ) 0 )){
-// 			printf(" force = %d \n", force);
-// 		}
 	}
 
 }
@@ -331,12 +329,10 @@ static void config_AFEC_force(Afec *afec, uint32_t afec_id, uint32_t afec_channe
 
 void send_package(char id, char eof){
 	while(!usart_is_tx_ready(USART_COM)){
-		//vTaskDelay(10/portTICK_PERIOD_MS);
 	}
 	usart_write(USART_COM, id);
 	
 	while(!usart_is_tx_ready(USART_COM)){
-		//vTaskDelay(10/portTICK_PERIOD_MS);
 	}
 	
 	usart_write(USART_COM, eof);
@@ -354,7 +350,12 @@ char recive_package(void){
 	return status;
 }
 
-
+void pin_toggle(Pio *pio, uint32_t mask) {
+	if (pio_get_output_data_status(pio, mask))
+	pio_clear(pio, mask);
+	else
+	pio_set(pio, mask);
+}
 
 /* --- --- --- --- --- --- --- --- --- --- --- --- */
 // MAIN
