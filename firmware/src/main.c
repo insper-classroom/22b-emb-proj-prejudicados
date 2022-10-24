@@ -55,6 +55,12 @@
 #define TASK_BLUETOOTH_STACK_SIZE (4096/sizeof(portSTACK_TYPE))
 #define TASK_BLUETOOTH_STACK_PRIORITY (tskIDLE_PRIORITY)
 
+// LED conexão BT
+#define LEDBT_PIO      PIOB
+#define LEDBT_PIO_ID   ID_PIOB
+#define LEDBT_IDX      3
+#define LEDBT_IDX_MASK (1 << LEDBT_IDX)
+
 // Variáveis Globais
 
 /* Coloque seus defines aqui /*
@@ -71,6 +77,7 @@ void init_exitbut(void);
 void init_onoffbut(void);
 void init_joystickr(void);
 void init_joystickl(void);
+void init_LEDBT(void);
 int init_hc05(void);
 void joystickR_callback(void);
 void joystickL_callback(void);
@@ -154,17 +161,19 @@ void butonoff_callback(void){
 	xSemaphoreGiveFromISR(xSemaphoreHandshake, 0);
 }
 
-/* Coloque suas funções de callback aqui /*
 /* --- --- --- --- --- --- --- --- --- --- --- --- */
 // TASKS
+
+void pisca_LEDBT(void){
+	pio_clear(LEDBT_PIO, LEDBT_IDX_MASK);
+	delay_ms(100);
+	pio_set(LEDBT_PIO, LEDBT_IDX_MASK);
+	delay_ms(100);
+}
 
 void task_bluetooth(void) {
 	printf("Task Bluetooth started \n");
 	printf("Inicializando HC05 \n");
-	
-	
-	
-
 	// Inits e Configurações
 	config_usart0();
 	init_hc05();
@@ -174,6 +183,7 @@ void task_bluetooth(void) {
 	init_exitbut();
 	init_joystickr();
 	init_joystickl();  
+	init_LEDBT();
 	config_AFEC_force(AFEC_FORCE, AFEC_FORCE_ID, AFEC_FORCE_CHANNEL, AFEC_force_callback);
 	xTimer = xTimerCreate("Timer", 100, pdTRUE, (void *)0, vTimerCallback);   
 	xTimerStart(xTimer, 0);
@@ -194,7 +204,7 @@ void task_bluetooth(void) {
 				//esperando respostas
 				response = recive_package();
 				printf("%c", response);
-			
+				pisca_LEDBT();
 				//tudo certo
 				if(response == 'H'){
 					//caso ainda o programa nao esteja rodando (queremos ligar)
@@ -278,6 +288,11 @@ void init_joystickl(void){
 	pio_get_interrupt_status(BUTLEFT_PIO);
 	NVIC_EnableIRQ(BUTLEFT_PIO_ID);
 	NVIC_SetPriority(BUTLEFT_PIO_ID, 4);
+}
+
+void init_LEDBT(void){
+	pmc_enable_periph_clk(LEDBT_PIO_ID);
+	pio_set_output(LEDBT_PIO, LEDBT_IDX_MASK, 0, 0, 0);
 }
 
 int init_hc05(void) {
