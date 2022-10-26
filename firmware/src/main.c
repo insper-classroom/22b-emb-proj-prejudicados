@@ -87,7 +87,7 @@ static void AFEC_force_callback(void);
 static void config_AFEC_force(Afec *afec, uint32_t afec_id, uint32_t afec_channel, afec_callback_t callback);
 void send_package(char id, char eof);
 char recive_package(void);
-void pin_toggle(Pio *pio, uint32_t mask);
+void pisca_LEDBT(void);
 /* --- --- --- --- --- --- --- --- --- --- --- --- */
 // GLOBAL VARIABLES
 
@@ -164,20 +164,13 @@ void butonoff_callback(void){
 /* --- --- --- --- --- --- --- --- --- --- --- --- */
 // TASKS
 
-void pisca_LEDBT(void){
-	pio_clear(LEDBT_PIO, LEDBT_IDX_MASK);
-	delay_ms(100);
-	pio_set(LEDBT_PIO, LEDBT_IDX_MASK);
-	delay_ms(100);
-}
-
 void task_bluetooth(void) {
 	printf("Task Bluetooth started \n");
 	printf("Inicializando HC05 \n");
 	// Inits e Configurações
 	config_usart0();
 	init_hc05();
-	init_led(LED_PIO, LED_PIO_ID, LED_PIO_IDX_MASK);
+	init_led(LED_PIO, LED_PIO_ID, LED_PIO_IDX_MASK);                                                                                                           
 	init_startbut();
 	init_onoffbut();
 	init_exitbut();
@@ -215,7 +208,12 @@ void task_bluetooth(void) {
 			if( xQueueReceive(xQueueProtocolo, &id, ( TickType_t ) 0 )){
 				send_package(id, eof);
 				if (id == '5'){
-					pin_toggle(LEDBT_PIO, LEDBT_IDX_MASK);
+// 					pin_toggle(LEDBT_PIO, LEDBT_IDX_MASK);
+// 					delay_ms(50);
+// 					pin_toggle(LEDBT_PIO, LEDBT_IDX_MASK);
+// 					delay_ms(50);         
+// 					pin_toggle(LEDBT_PIO, LEDBT_IDX_MASK);
+					pisca_LEDBT();
 				}
 			}
 		}	
@@ -350,12 +348,13 @@ char recive_package(void){
 	return status;
 }
 
-void pin_toggle(Pio *pio, uint32_t mask) {
-	if (pio_get_output_data_status(pio, mask))
-	pio_clear(pio, mask);
-	else
-	pio_set(pio, mask);
+void pisca_LEDBT(void){
+	pio_set(LEDBT_PIO, LEDBT_IDX_MASK);
+	delay_ms(300);
+	pio_clear(LEDBT_PIO, LEDBT_IDX_MASK);
+	delay_ms(300);
 }
+
 
 /* --- --- --- --- --- --- --- --- --- --- --- --- */
 // MAIN
