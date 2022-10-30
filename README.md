@@ -64,7 +64,5 @@ Racional: Feedback de quando o botão efetivamente atira. Faz um som agudo toda 
 ![](esboco.png)
 
 
-### Vídeo
-
-[![Controle para SpaceInvaders]]
-(https://youtu.be/ItxZJ7i1D5o "Now in Android: 55")    // Video Link
+### Link Vídeo:
+https://youtu.be/ItxZJ7i1D5o
