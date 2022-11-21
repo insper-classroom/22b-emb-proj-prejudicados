@@ -86,7 +86,7 @@ void exitbut_callback(void);
 static void AFEC_force_callback(void);
 static void config_AFEC_force(Afec *afec, uint32_t afec_id, uint32_t afec_channel, afec_callback_t callback);
 void send_package(char id, char eof);
-char recive_package(void);
+char recive_package(int timeout);
 void pisca_LEDBT(void);
 /* --- --- --- --- --- --- --- --- --- --- --- --- */
 // GLOBAL VARIABLES
@@ -182,7 +182,7 @@ void task_bluetooth(void) {
 			while(run == 0) {
 				//handshake
 				send_package('H', 'X');
-				if (recive_package() == 'H') {
+				if (recive_package(500) == 'H') {
 					pisca_LEDBT();
 					run = 1;
 					break;
@@ -315,12 +315,12 @@ void send_package(char id, char eof){
 	usart_write(USART_COM, eof);
 }
 
-char recive_package(void){
+char recive_package(int timeout){
 	char status;
-	int timeout;
+	int counter;
 	while(!usart_is_rx_ready(USART_COM)){
 		vTaskDelay(10/portTICK_PERIOD_MS);	
-		if(timeout++ > 50) return 0;
+		if(counter++ > timeout/10) return 0;
 	}
 	usart_read(USART_COM, &status);
 	
