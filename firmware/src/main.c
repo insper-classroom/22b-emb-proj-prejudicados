@@ -116,26 +116,14 @@ void exitbut_callback(void){
 
 void joystickR_callback(void){
 	//botao foi abertado
-	if(!pio_get(BUTRIGHT_PIO , PIO_INPUT, BUTRIGHT_IDX_MASK)){
-		char id = '2';
-		xQueueSendFromISR(xQueueProtocolo, &id, 0);
-	}
-	else{
-		char id = '0';
-		xQueueSendFromISR(xQueueProtocolo, &id, 0);
-	}
+	char id = itoa(pio_get(BUTRIGHT_PIO , PIO_INPUT, BUTRIGHT_IDX_MASK) * 2)
+	xQueueSendFromISR(xQueueProtocolo, &id, 0);
 }
 
 void joystickL_callback(void){
 	//botao foi abertado
-	if(!pio_get(BUTLEFT_PIO , PIO_INPUT, BUTLEFT_IDX_MASK)){
-		char id = '3';
-		xQueueSendFromISR(xQueueProtocolo, &id, 0);
-	}
-	else{
-		char id = '0';
-		xQueueSendFromISR(xQueueProtocolo, &id, 0);
-	}
+	char id = itoa(pio_get(BUTLEFT_PIO , PIO_INPUT, BUTLEFT_IDX_MASK) * 3)
+	xQueueSendFromISR(xQueueProtocolo, &id, 0);
 }
 
 static void AFEC_force_callback(void) {
@@ -194,11 +182,8 @@ void task_bluetooth(void) {
 			while(run == 0) {
 				//handshake
 				send_package('H', 'X');
-				response = recive_package();
-				printf("%c", response);
-				pisca_LEDBT();
-				//tudo certo
-				if(response == 'H'){
+				if (recive_package() == 'H') {
+					pisca_LEDBT();
 					run = 1;
 					break;
 				}
@@ -208,11 +193,6 @@ void task_bluetooth(void) {
 			if( xQueueReceive(xQueueProtocolo, &id, ( TickType_t ) 0 )){
 				send_package(id, eof);
 				if (id == '5'){
-// 					pin_toggle(LEDBT_PIO, LEDBT_IDX_MASK);
-// 					delay_ms(50);
-// 					pin_toggle(LEDBT_PIO, LEDBT_IDX_MASK);
-// 					delay_ms(50);         
-// 					pin_toggle(LEDBT_PIO, LEDBT_IDX_MASK);
 					pisca_LEDBT();
 				}
 			}
@@ -220,9 +200,6 @@ void task_bluetooth(void) {
 	}
 
 }
-
-/* --- --- --- --- --- --- --- --- --- --- --- --- */
-// FUNÇÕES
 
 /* --- --- --- --- --- --- --- --- --- --- --- --- */
 // INICIALIZAÇÕES
@@ -324,6 +301,8 @@ static void config_AFEC_force(Afec *afec, uint32_t afec_id, uint32_t afec_channe
   NVIC_EnableIRQ(afec_id);
 }
 
+/* --- --- --- --- --- --- --- --- --- --- --- --- */
+// FUNÇÕES
 
 void send_package(char id, char eof){
 	while(!usart_is_tx_ready(USART_COM)){
