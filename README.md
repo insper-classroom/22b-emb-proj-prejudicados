@@ -40,7 +40,7 @@ Botão Start: inicia o jogo (input)
 Joystick Arcade left: anda a nave p/ esquerda (input)
 Joystick Arcade right: anda a nave p/ direita (input)
 Bater martelo na almofada: atirar (input)
-Buzzer: toca música ao acertar o alien (output)
+LED: acende a cada tiro da nave (output)
 
 ## In/OUT (3 pts)
 
@@ -54,11 +54,15 @@ Racional: Precisamos de uma forma de fazer o usuário começar o jogo. Ao clicar
 Racional: Utilizado para começar o pareamento entre o programa em python e o sistema embarcado. Enquanto estiver pareando o botão pisca, quando pareado ele fica ligado
 - Sensor pra atirar: Strain Gauge
 Racional: Sensor que muda resistência a partir de impacto. Quando a resistência for acima de x (ou abaixo - não vimos as especificações do componente ainda) a nave atira
-- Som de atirar: Buzzer
-Racional: Feedback de quando o botão efetivamente atira. Faz um som agudo toda vez que a nave atira.
+- Sinal de atirar: LED
+Racional: Feedback de quando o botão efetivamente atira. Acende toda vez que a nave atira.
 
 
 
 ### Design (2 pts)
 
 ![](esboco.png)
+
+
+### Link Vídeo:
+https://youtu.be/ItxZJ7i1D5o
