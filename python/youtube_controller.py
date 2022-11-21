@@ -1,4 +1,4 @@
-import pyautogui
+import pydirectinput
 import serial
 import argparse
 import time
@@ -6,7 +6,7 @@ import logging
 
 class MyControllerMap:
     def __init__(self):
-        self.button = {'A': 'L'} # Fast forward (10 seg) pro Youtube
+        self.button = {'joyright': 'right', 'joyleft' : 'left', 'start': 'enter', 'out':'esc', 'shoot': 'space'}
 
 class SerialControllerInterface:
     # Protocolo
@@ -14,10 +14,11 @@ class SerialControllerInterface:
     # byte 2 -> EOP - End of Packet -> valor reservado 'X'
 
     def __init__(self, port, baudrate):
-        self.ser = serial.Serial(port, baudrate=baudrate)
+        self.ser = serial.Serial(port, baudrate=baudrate)     
         self.mapping = MyControllerMap()
         self.incoming = '0'
-        pyautogui.PAUSE = 0  ## remove delay
+        pydirectinput.PAUSE = 0  ## remove delay   
+
     
     def update(self):
         ## Sync protocol
@@ -25,17 +26,71 @@ class SerialControllerInterface:
             self.incoming = self.ser.read()
             logging.debug("Received INCOMING: {}".format(self.incoming))
 
-        data = self.ser.read()
-        logging.debug("Received DATA: {}".format(data))
+
+        data = self.ser.read() 
+        
+
+        print(f"data: {data}")
+
+
+        """
+        1 = start but
+        2 = joystick right
+        3 = joystick left
+        4 = esc but
+        """
+
+        logging.debug("Received DATA: {}".format(data)) 
+                 
+
+        if data == b'H':
+            self.ser.write(b'H') 
+
+        if data == b'0':
+            pydirectinput.keyUp(self.mapping.button['joyleft'])
+            pydirectinput.keyUp(self.mapping.button['joyright'])        
 
         if data == b'1':
-            logging.info("KEYDOWN A")
-            pyautogui.keyDown(self.mapping.button['A'])
-        elif data == b'0':
-            logging.info("KEYUP A")
-            pyautogui.keyUp(self.mapping.button['A'])
+            pydirectinput.keyDown(self.mapping.button['start'])
+            pydirectinput.keyUp(self.mapping.button['joyleft'])
+            pydirectinput.keyUp(self.mapping.button['joyright'])
+            pydirectinput.keyUp(self.mapping.button['out'])
+            pydirectinput.keyUp(self.mapping.button['shoot']) 
+
+        if data == b'2':
+            pydirectinput.keyDown(self.mapping.button['joyright']) 
+            pydirectinput.keyUp(self.mapping.button['joyleft'])
+            pydirectinput.keyUp(self.mapping.button['start'])
+            pydirectinput.keyUp(self.mapping.button['out']) 
+            pydirectinput.keyUp(self.mapping.button['shoot']) 
+        
+        if data == b'3':
+            pydirectinput.keyDown(self.mapping.button['joyleft'])
+            pydirectinput.keyUp(self.mapping.button['start'])
+            pydirectinput.keyUp(self.mapping.button['joyright'])
+            pydirectinput.keyUp(self.mapping.button['out']) 
+            pydirectinput.keyUp(self.mapping.button['shoot'])  
+
+        if data == b'4':
+            pydirectinput.keyDown(self.mapping.button['out'])
+            pydirectinput.keyUp(self.mapping.button['start'])
+            pydirectinput.keyUp(self.mapping.button['joyright'])
+            pydirectinput.keyUp(self.mapping.button['joyleft'])
+            pydirectinput.keyUp(self.mapping.button['shoot'])  
+        
+
+        if data == b'5':
+            pydirectinput.keyDown(self.mapping.button['shoot'])
+            time.sleep(0.05)
+            pydirectinput.keyUp(self.mapping.button['shoot']) 
+            pydirectinput.keyUp(self.mapping.button['start'])
+            pydirectinput.keyUp(self.mapping.button['joyright'])
+            pydirectinput.keyUp(self.mapping.button['joyleft']) 
+            pydirectinput.keyUp(self.mapping.button['out']) 
 
         self.incoming = self.ser.read()
+
+
 
 
 class DummyControllerInterface:
@@ -43,9 +98,9 @@ class DummyControllerInterface:
         self.mapping = MyControllerMap()
 
     def update(self):
-        pyautogui.keyDown(self.mapping.button['A'])
+        pydirectinput.keyDown(self.mapping.button['A'])
         time.sleep(0.1)
-        pyautogui.keyUp(self.mapping.button['A'])
+        pydirectinput.keyUp(self.mapping.button['A'])
         logging.info("[Dummy] Pressed A button")
         time.sleep(1)
 

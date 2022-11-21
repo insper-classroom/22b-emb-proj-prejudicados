@@ -6,48 +6,63 @@ Desenvolvendo um controle remoto.
 
 ### Integrantes
 
-- Nome1
-- Nome2
+- Gabriel Onishi
+- Sarah Pimenta
 
 ### Ideia
 
-<!--  Descreva aqui em poucas palavras qual a ideia do seu controle. Se ele vai ser de jogo ou de aplicação -->
+Controle de Space Invaders com Joystick arcade para movimento e bater um martelo de brinquedo em uma almofada para atirar
 
 ### Nome
 
-<!-- De um nome ao seu controle! -->
+Space Invaders: Terapia Edition
 
 ### Usuários 
 
-<!-- Descreva aqui quem seriam os possíveis usuários deste controle. -->
+Pessoas buscando desestressar e se divertir
 
 ### Software/Jogo 
 
-<!-- Qual software que seu controle vai controlar? -->
+Adaptação de Space Invaders utilizando PyGame
 
 ### Jornada do usuários (3 pts)
 
-<!-- Descreva ao menos duas jornadas de usuários distintos, é para caprichar! -->
+Cenário 1:
+Um aluno de graduação  do Insper está estressado com as provas que estão por vir. Buscando descontrair, ele vai para a feira de Computação Embarcada e se depara com um jogo familiar: Space Invaders. Apesar de ser o mesmo jogo que jogava quando criança, ele repara que há algo de diferente quando vê outros alunos batendo desesperadamente com uma marreta na mesa. Ele decide experimentar e miraculosamente a terapia na base da violência funciona! O aluno acaba o seu jogo menos estressado e mais disposto à voltar aos estudos
+
+Cenário 2:
+Um professor da graduação do Insper está chateado com as notas de seus alunos nas provas intermediárias. Depois de passar todo o fim de semana corrigindo avaliações, ele volta para a faculdade na semana seguinte e visita a feira de Computação Embarcada dos alunos do 5° semestre de Engenharia da Computação. Ainda com um pouco de rancor no coração, ele encontra em uma das mesas um cenário inesperado: seus colegas de trabalho batendo desesperadamente com um martelo em uma almofada enquanto controlam um joystick. Ele se aproxima e reconhece a nave e os aliens pixelados - era um jogo da infância. Decide jogar e, depois de apenas alguns minutos imaginando alguns alunos tagarelas na mesa, ele recupera seu bom humor e vontade de lecionar
 
 ### Comandos/ Feedbacks (2 pts)
 
-<!-- 
-Quais são os comandos/ operacões possíveis do seu controle?
-
-Quais os feedbacks que seu controle vai fornecer ao usuário?
--->
+Botão Power: liga e pareia bluetooth (input/output)
+Botão Start: inicia o jogo (input)
+Joystick Arcade left: anda a nave p/ esquerda (input)
+Joystick Arcade right: anda a nave p/ direita (input)
+Bater martelo na almofada: atirar (input)
+LED: acende a cada tiro da nave (output)
 
 ## In/OUT (3 pts)
 
-<!--
 Para cada Comando/ Feedback do seu controle, associe qual sensores/ atuadores pretende utilizar? Faca em formato de lista, exemplo:
 
-- Avanca música: Push button amarelo
-- Volume da música: Fita de LED indicando potência do som
--->
+- Movimento da Nave: Joystick Arcade.
+Racional: Utilizaremos o sensor apenas para virar pra esquerda e para direita. Se o usuário manter o botão pressionado o personagem continua com o movimento.
+- Start Game: Push Button
+Racional: Precisamos de uma forma de fazer o usuário começar o jogo. Ao clicar, o jogo executa a função selecionada na tela.
+- Pareamento Bluetooth: Mini Illuminated Pushbutton
+Racional: Utilizado para começar o pareamento entre o programa em python e o sistema embarcado. Enquanto estiver pareando o botão pisca, quando pareado ele fica ligado
+- Sensor pra atirar: Strain Gauge
+Racional: Sensor que muda resistência a partir de impacto. Quando a resistência for acima de x (ou abaixo - não vimos as especificações do componente ainda) a nave atira
+- Sinal de atirar: LED
+Racional: Feedback de quando o botão efetivamente atira. Acende toda vez que a nave atira.
+
+
 
 ### Design (2 pts)
 
-<!--
-Faca um esboco de como seria esse controle (vai ter uma etapa que terão que detalhar melhor isso).
--->
+![](esboco.png)
+
+
+### Link Vídeo:
+https://youtu.be/ItxZJ7i1D5o
